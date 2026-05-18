@@ -49,6 +49,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     favicon: './assets/favicon.png',
   },
   plugins: [
+    'expo-asset',
     [
       '@sentry/react-native/expo',
       {
