@@ -8,21 +8,32 @@ in the Philippines. Built with React Native + Expo for iOS and Android.
 🚧 **Phase 1 — Foundation.** No user-facing features yet; this commit
 contains the project scaffold, tooling, and planning documents.
 
-See [docs/PROJECT-PLAN.md](docs/PROJECT-PLAN.md) for the full roadmap and
-[docs/STORE-SUBMISSION.md](docs/STORE-SUBMISSION.md) for per-store
-checklists.
+- [docs/PROJECT-PLAN.md](docs/PROJECT-PLAN.md) — phased roadmap, risks,
+  policy notes, costs.
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how the repo is laid out,
+  where the iOS/Android code lives, what's shared.
+- [docs/STORE-SUBMISSION.md](docs/STORE-SUBMISSION.md) — per-store
+  checklists for App Store and Play Console.
+- [CONTRIBUTING.md](CONTRIBUTING.md) — branch naming and commit format.
 
 ## Tech stack
 
 | Layer        | Choice                                          |
 |--------------|-------------------------------------------------|
 | App          | React Native + **Expo (managed) SDK 52**        |
-| Build / ship | **EAS Build** + EAS Submit                      |
+| Build / ship | **EAS** (Expo Application Services): EAS Build + EAS Submit + EAS Update |
 | Language     | TypeScript (strict)                             |
 | Backend      | **Supabase** (Postgres, Auth, Edge Functions)   |
 | Errors       | **Sentry** (`@sentry/react-native`)             |
 | Lint/format  | ESLint + Prettier                               |
 | Commits      | Conventional Commits (commitlint + Husky)       |
+
+**Expo** is a framework on top of React Native that bundles tooling, native
+modules, and a managed iOS/Android project. **EAS** (Expo Application
+Services) is Expo's hosted cloud — it builds our `.ipa` / `.aab` files,
+uploads them to TestFlight / Google Play, and ships over-the-air JS updates
+between store releases. See [docs/PROJECT-PLAN.md §2](docs/PROJECT-PLAN.md#2-stack-react-native--expo-eas)
+for the full rationale.
 
 Bundle ID / Application ID: `ph.bidawash.app`
 

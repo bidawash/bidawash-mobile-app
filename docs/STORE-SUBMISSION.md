@@ -32,6 +32,15 @@ Operational reference for each store submission. Pair with
 
 ## Apple — TestFlight & App Store
 
+> **TestFlight** is Apple's official beta-distribution service for iOS apps.
+> It lets us ship pre-release builds to **internal testers** (team members
+> added by Apple ID, up to 100) and **external testers** (anyone, by email
+> invite or public link, up to 10,000) without going through full App Store
+> review. External builds do require a short Beta App Review on the first
+> submission, but it's much lighter than full App Store review. We use
+> TestFlight for QA in Phase 2 and for closed-beta payments testing in
+> Phase 3.
+
 ### Pre-submission
 
 - [ ] Apple Developer membership active (Individual for Phase 2 testing,
