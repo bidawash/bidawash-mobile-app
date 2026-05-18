@@ -1,0 +1,53 @@
+# OSX
+.DS_Store
+
+# Node
+node_modules/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+
+# Native
+ios/
+android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Metro
+.metro-health-check*
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Secrets (EAS Submit credentials etc.)
+secrets/
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Logs
+*.log
+
+# Testing
+coverage/
+
+# Typescript
+*.tsbuildinfo
+
+# Sentry
+.sentryclirc
