@@ -19,10 +19,11 @@ For contribution conventions (branches, commits), see [CONTRIBUTING.md](../CONTR
 4. [Repo / folder structure](#4-repo--folder-structure)
 5. [Hard blockers for store submission](#5-hard-blockers-for-store-submission)
 6. [Credentials, accounts, documents](#6-credentials-accounts-documents)
-7. [Apple / Google policy implications](#7-apple--google-policy-implications)
-8. [Phase 2 MVP scope](#8-phase-2-mvp-scope)
-9. [Step-by-step roadmap](#9-step-by-step-roadmap)
-10. [Assumptions and open questions](#10-assumptions-and-open-questions)
+7. [Cost implications](#7-cost-implications)
+8. [Apple / Google policy implications](#8-apple--google-policy-implications)
+9. [Phase 2 MVP scope](#9-phase-2-mvp-scope)
+10. [Step-by-step roadmap](#10-step-by-step-roadmap)
+11. [Assumptions and open questions](#11-assumptions-and-open-questions)
 
 ---
 
@@ -39,6 +40,12 @@ Three things to keep in mind:
   Anything submitted under the Individual account (including TestFlight) is
   effectively throwaway. A fresh App Store Connect record will be created
   under the Organization once D-U-N-S is approved.
+
+  *TestFlight is Apple's official beta-distribution service for iOS apps. It
+  lets you ship pre-release builds to internal testers (your team, by Apple
+  ID) and up to 10,000 external testers (by email invite or public link)
+  without going through full App Store review. We'll use it for QA in
+  Phase 2 and for closed-beta access in Phase 3.*
 - **Google Play new-account testing requirement.** New developer accounts
   (especially personal, but increasingly orgs too) must run a closed test
   with **12+ testers for 14+ continuous days** before being eligible for
@@ -47,6 +54,26 @@ Three things to keep in mind:
 ## 2. Stack: React Native + Expo (EAS)
 
 Decision: **React Native + Expo (managed workflow) with EAS Build / EAS Submit.**
+
+> **What is Expo and EAS?**
+> **Expo** is an open-source framework on top of React Native. It bundles the
+> tooling (CLI, dev client, push, updates, native modules) so you can build
+> iOS and Android apps from one TypeScript/JavaScript codebase without
+> touching Xcode or Android Studio day-to-day.
+>
+> **EAS** stands for **Expo Application Services**. It's Expo's hosted cloud
+> service for the parts you can't (or don't want to) do locally:
+> - **EAS Build** — compiles your iOS `.ipa` and Android `.aab` / `.apk` in
+>   the cloud on Apple/Google's required hardware, so you don't need a Mac
+>   for iOS builds or a beefy local toolchain for Android.
+> - **EAS Submit** — uploads finished builds to TestFlight / Google Play.
+> - **EAS Update** — over-the-air JS bundle updates so you can push bug
+>   fixes without re-submitting to the stores.
+>
+> The "managed workflow" means Expo owns the native iOS/Android project
+> files; we only write JS/TS. If a feature ever needs a custom native
+> module, `expo prebuild` generates the native projects so we can drop down
+> a level without rewriting the app.
 
 Reasoning:
 
@@ -76,6 +103,10 @@ Functions**, never in the app. The app must never hold Stripe / Maya / GCash
 secret keys.
 
 ## 4. Repo / folder structure
+
+> For a deeper walkthrough — where the iOS/Android code lives, what's
+> shared, what gets generated at build time, the EAS Build flow — see
+> [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 Single Expo app, feature-folder layout. No monorepo yet — add it later if a
 web admin appears.
@@ -204,7 +235,64 @@ Day-one conventions (all enforced by tooling in Phase 1):
 - ⬜ PH Data Privacy Act 2012 compliance — if processing personal data of
   1,000+ people, register with the NPC.
 
-## 7. Apple / Google policy implications
+## 7. Cost implications
+
+Grouped by when each cost lands. All third-party prices are approximate and
+based on each vendor's public pricing at the time of writing — **verify on
+each vendor's site before committing budget**. Currency: USD unless stated.
+
+### One-time
+
+| Item                                  | Cost                | Notes                                                          |
+|---------------------------------------|---------------------|----------------------------------------------------------------|
+| Google Play Console (Org)             | **$25**             | Lifetime, one-off.                                             |
+| D-U-N-S number (for Apple Org)        | Free via Apple      | 1–14 days; longer for some PH entities.                        |
+| PH business registration (SEC/DTI)    | ~₱5,000–₱20,000     | Required for the business; not app-specific.                   |
+| Brand asset design (icon, splash, palette) | ₱5,000–₱100,000+ | Designer-dependent; can DIY initially.                         |
+| Legal review of privacy/terms         | ₱20,000–₱200,000+   | Optional in Phase 2; strongly recommended before Phase 3 launch. |
+
+### Recurring (annual)
+
+| Item                                  | Cost                | Notes                                                          |
+|---------------------------------------|---------------------|----------------------------------------------------------------|
+| Apple Developer (Individual)          | **$99/yr**          | Already paid. Keep current until the Org account is active.    |
+| Apple Developer (Organization)        | **$99/yr**          | Required for public iOS launch. **Additional**, not a replacement during the transition window. |
+| `bidawash.com` domain                 | ~$10–15/yr          | Already owned.                                                 |
+
+### Subscriptions (free tier first; upgrade as usage grows)
+
+| Service                               | Free tier covers                                | Paid plan when needed                                                                 |
+|---------------------------------------|--------------------------------------------------|-----------------------------------------------------------------------------------------|
+| **Expo / EAS** (build & ship)         | ~30 cloud builds/mo, 1 concurrent build, basic EAS Update | Production: **~$99/mo** for faster builds, more concurrency, higher OTA limits. Likely needed once we ship weekly. |
+| **Supabase** (backend)                | 500 MB Postgres, 1 GB file storage, 50K MAU     | Pro: **$25/mo + usage** once you exceed free-tier MAU or storage.                       |
+| **Sentry** (crash reporting)          | 5K errors/mo, 1 seat                            | Team: **~$26/mo** for multiple seats and higher event volume.                           |
+| Privacy/terms hosting                 | GitHub Pages or Vercel free tier                | Free for the foreseeable future.                                                        |
+| Push notifications                    | Expo push service is free; APNs + FCM are free | No paid tier needed.                                                                    |
+| Google Maps (if used in Locations)    | $200/mo free Maps credit                        | ~$2–7 per 1,000 map loads past the free credit. Most likely free-tier for our volume.   |
+
+### Phase 3 — payment processing (transactional, not subscription)
+
+Per-transaction fees taken by the payment provider. **Apple and Google take
+0%** because BidaWash sells physical car-wash services (see §8).
+
+| Provider                              | Typical PH rate                                  |
+|---------------------------------------|--------------------------------------------------|
+| Stripe (cards, PH)                    | ~3.9% + ₱15 per transaction                      |
+| Maya (cards / e-wallet)               | ~2.5–3.5% per transaction                        |
+| GCash (e-wallet)                      | ~2–2.5% per transaction                          |
+
+### Illustrative steady-state monthly OpEx
+
+Excludes transaction fees, design, legal, and PH business-registration costs
+(those are one-off or already sunk).
+
+| Stage                                                       | Monthly run-rate                                |
+|-------------------------------------------------------------|--------------------------------------------------|
+| **Phase 2** (informational MVP, low traffic)               | Everything fits free tiers; amortized Apple/Google fees only ≈ **~$16/mo**. |
+| **Phase 3 early** (a few hundred MAU)                       | Supabase Pro ($25) + Sentry Team ($26) ≈ **~$50–70/mo**. |
+| **Phase 3 scaled** (thousands of MAU, weekly EAS builds)   | + EAS Production ($99) ≈ **~$170+/mo** plus payment processing fees. |
+
+## 8. Apple / Google policy implications
 
 ### Payments — the big one
 
@@ -246,7 +334,7 @@ The car wash is a **real-world physical service**, which puts BidaWash in the
   review notes. Set up a permanent `reviewer@bidawash.com` with pre-seeded
   data.
 
-## 8. Phase 2 MVP scope
+## 9. Phase 2 MVP scope
 
 Build only:
 
@@ -274,7 +362,7 @@ purchase history, refund flows.
 **Aggressive but realistic timeline:** 4–6 weeks for one engineer if assets
 and copy are ready; 8–10 weeks if designing as we go.
 
-## 9. Step-by-step roadmap
+## 10. Step-by-step roadmap
 
 ### Phase 1 — Foundation (week 1–2, in parallel)
 
@@ -336,7 +424,7 @@ and copy are ready; 8–10 weeks if designing as we go.
     on the membership/IAP question — have the "physical service" rationale
     ready in review notes.
 
-## 10. Assumptions and open questions
+## 11. Assumptions and open questions
 
 Held as assumptions — flag any that are wrong:
 

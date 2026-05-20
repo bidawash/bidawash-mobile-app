@@ -4,19 +4,24 @@ import { env } from '@/lib/env';
 
 let initialized = false;
 
-// Idempotent so calling from App.tsx and from anywhere else (e.g. tests) is
-// safe. No-ops when the DSN is empty — we don't want local dev or PR-preview
-// builds polluting the production Sentry project.
+// Sentry only runs in production builds. We skip init in development because:
+//   1. Expo Go doesn't include Sentry's native module — calling init() there
+//      throws "Native Client is not available, can't start on native".
+//   2. Even in a dev client build, we don't want dev errors polluting the
+//      production Sentry project.
+//
+// To smoke-test Sentry locally, build a release client with
+// `eas build --profile preview` instead of running `expo start`.
 export function initSentry(): void {
   if (initialized) return;
   if (!env.sentryDsn) return;
+  if (__DEV__) return;
 
   Sentry.init({
     dsn: env.sentryDsn,
     // Keep traces light by default; tune in production once we have signal.
     tracesSampleRate: 0.1,
-    // Surface stack traces in dev so we can spot init issues immediately.
-    debug: __DEV__,
+    debug: false,
   });
 
   initialized = true;
