@@ -213,6 +213,8 @@ links, and maps all have Expo-supported equivalents.
 
 - [PROJECT-PLAN.md](./PROJECT-PLAN.md) — phased roadmap, risks, policy notes,
   costs.
+- [APP-SURFACE.md](./APP-SURFACE.md) — every screen, every flow, and what's
+  stubbed vs real today.
 - [STORE-SUBMISSION.md](./STORE-SUBMISSION.md) — per-store checklists.
 - [../CONTRIBUTING.md](../CONTRIBUTING.md) — branch naming, commit format,
   local setup.

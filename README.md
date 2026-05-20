@@ -10,6 +10,8 @@ contains the project scaffold, tooling, and planning documents.
 
 - [docs/PROJECT-PLAN.md](docs/PROJECT-PLAN.md) — phased roadmap, risks,
   policy notes, costs.
+- [docs/APP-SURFACE.md](docs/APP-SURFACE.md) — living reference for every
+  screen, every flow, and what's stubbed vs real today.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how the repo is laid out,
   where the iOS/Android code lives, what's shared.
 - [docs/STORE-SUBMISSION.md](docs/STORE-SUBMISSION.md) — per-store
