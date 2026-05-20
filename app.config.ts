@@ -50,6 +50,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-asset',
+    'expo-font',
     [
       '@sentry/react-native/expo',
       {
