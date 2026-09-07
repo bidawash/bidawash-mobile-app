@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/auth/AuthContext';
+import { friendlyAuthError } from '@/auth/errors';
+import { BrandMark } from '@/components/BrandMark';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
@@ -20,17 +22,17 @@ export function SignInScreen({ navigation }: AuthScreenProps<'SignIn'>) {
     setError(null);
     try {
       await signIn(email.trim(), password);
-    } catch {
-      setError('Could not sign in. Check your email and password.');
+    } catch (err) {
+      setError(friendlyAuthError(err, 'Could not sign in. Please try again.'));
     }
   }
 
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.brand}>BidaWash</Text>
-        <Text style={styles.title}>Welcome back</Text>
-        <Text style={styles.subtitle}>Sign in to your account.</Text>
+        <BrandMark size="md" />
+        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.subtitle}>Sign in to your account</Text>
       </View>
 
       <View style={styles.form}>
@@ -39,14 +41,19 @@ export function SignInScreen({ navigation }: AuthScreenProps<'SignIn'>) {
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
-          placeholder="you@example.com"
+          placeholder="Enter email"
+          autoComplete="email"
+          textContentType="emailAddress"
+          autoCapitalize="none"
         />
         <TextField
           label="Password"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          placeholder="At least 6 characters"
+          placeholder="Enter password"
+          autoComplete="current-password"
+          textContentType="password"
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button title="Sign in" onPress={handleSubmit} loading={isLoading} disabled={!canSubmit} />
@@ -59,19 +66,18 @@ export function SignInScreen({ navigation }: AuthScreenProps<'SignIn'>) {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>Don&apos;t have an account?</Text>
-        <Button title="Create one" variant="ghost" onPress={() => navigation.navigate('SignUp')} />
+        <Button title="Sign up" variant="ghost" onPress={() => navigation.navigate('SignUp')} />
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { gap: theme.spacing.xs, marginBottom: theme.spacing.md },
-  brand: { fontSize: 16, fontWeight: '700', color: theme.colors.primary },
-  title: { fontSize: 28, fontWeight: '700', color: theme.colors.text },
-  subtitle: { fontSize: 15, color: theme.colors.muted },
+  header: { gap: theme.spacing.sm, marginBottom: theme.spacing.md },
+  title: { fontSize: 34, fontWeight: '800', color: theme.colors.primary, letterSpacing: -0.5 },
+  subtitle: { fontSize: 15, fontWeight: '700', color: theme.colors.text, lineHeight: 21 },
   form: { gap: theme.spacing.md },
   error: { color: theme.colors.danger, fontSize: 13 },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
-  footerText: { color: theme.colors.muted, fontSize: 14 },
+  footerText: { color: theme.colors.text, fontSize: 14 },
 });

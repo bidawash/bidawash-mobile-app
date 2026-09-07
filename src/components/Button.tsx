@@ -10,7 +10,7 @@ import {
 
 import { theme } from '@/theme';
 
-type Variant = 'primary' | 'secondary' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'dark';
 
 type ButtonProps = {
   title: string;
@@ -80,5 +80,11 @@ const variantStyles: Record<Variant, { container: ViewStyle; label: TextStyle }>
   ghost: {
     container: { backgroundColor: 'transparent' },
     label: { color: theme.colors.primary },
+  },
+  // Charcoal-blue used by the membership Notify-me CTA so it visually
+  // pairs with the dark Premium Card image above it.
+  dark: {
+    container: { backgroundColor: '#1F2937' },
+    label: { color: '#FFFFFF' },
   },
 };

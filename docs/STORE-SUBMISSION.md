@@ -8,7 +8,7 @@ Operational reference for each store submission. Pair with
 ## Shared (both stores)
 
 - [ ] App name: **BidaWash**
-- [ ] Bundle ID / Application ID: **`ph.bidawash.app`**
+- [ ] Bundle ID / Application ID: **`com.bidawash.app`**
 - [ ] Versioning: SemVer in `app.config.ts` (`version`); per-platform build
       numbers auto-bumped by EAS Submit.
 - [ ] Privacy policy URL live and reachable.
@@ -111,7 +111,7 @@ When the relevant capability is added, set a user-facing reason:
 ### Pre-submission
 
 - [ ] Google Play Console Org account created and business-verified.
-- [ ] Application ID registered: `ph.bidawash.app`.
+- [ ] Application ID registered: `com.bidawash.app`.
 - [ ] FCM service account JSON uploaded (deferred until Phase 2 push work).
 - [ ] App signing by Google Play enabled (default).
 - [ ] Internal test track set up with all team device emails.

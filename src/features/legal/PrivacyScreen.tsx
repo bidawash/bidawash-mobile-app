@@ -21,18 +21,31 @@ export function PrivacyScreen() {
       </View>
 
       <Card>
+        <Text style={styles.sectionHeading}>What we collect</Text>
         <Text style={styles.body}>
-          This is a placeholder summary. The full, legally-binding privacy policy will be hosted at{' '}
-          <Text style={styles.link}>{PRIVACY_URL}</Text> before app launch.
-        </Text>
-        <Text style={styles.body}>
-          BidaWash collects only what we need to run your account and operate our car-wash services:
-          your name, email, phone number, and the locations / services you book or purchase. We do
-          not sell your personal data.
+          Account details you give us (name, email, and optional phone), plus anonymous crash and
+          performance data to keep the app working smoothly. We never collect your precise location,
+          contacts, or photos.
         </Text>
       </Card>
 
-      <Button title="View full policy" variant="secondary" onPress={openFull} />
+      <Card>
+        <Text style={styles.sectionHeading}>How we use it</Text>
+        <Text style={styles.body}>
+          To create and manage your account, deliver our wash services, and improve the app. We do
+          not sell your personal data and we do not use it for advertising.
+        </Text>
+      </Card>
+
+      <Card>
+        <Text style={styles.sectionHeading}>Your rights</Text>
+        <Text style={styles.body}>
+          Under the Philippines Data Privacy Act (RA 10173), you can access, correct, or delete your
+          data at any time. Delete your account from the Account tab, or email support@bidawash.com.
+        </Text>
+      </Card>
+
+      <Button title="Read the full policy" variant="secondary" onPress={openFull} />
     </Screen>
   );
 }
@@ -41,6 +54,13 @@ const styles = StyleSheet.create({
   hero: { gap: theme.spacing.xs },
   title: { fontSize: 24, fontWeight: '700', color: theme.colors.text },
   subtitle: { fontSize: 15, color: theme.colors.muted },
+  sectionHeading: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: theme.colors.muted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: theme.spacing.xs,
+  },
   body: { fontSize: 14, color: theme.colors.text, lineHeight: 22 },
-  link: { color: theme.colors.primary },
 });

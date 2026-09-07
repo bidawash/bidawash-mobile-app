@@ -51,3 +51,6 @@ coverage/
 
 # Sentry
 .sentryclirc
+
+# Supabase CLI (regenerated on every command; not for source control)
+supabase/.temp/

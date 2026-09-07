@@ -1,69 +1,108 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
-import { Section } from '@/components/Section';
 import { theme } from '@/theme';
 
-const BENEFITS = [
-  'Unlimited washes across all branches',
-  'Member-only express lane',
-  'Priority booking during peak hours',
-  '15% off detailing and add-ons',
-  'Birthday wash on the house',
-];
+const CARD_ASPECT = 1.6; // source image (243×153) aspect ratio
+const CARD_SIDE_MARGIN = theme.spacing.xxl; // 48px gutter from each screen edge
+const SUPPORT_EMAIL = 'support@bidawash.com';
 
+// Informational screen for the BidaWash Premium loyalty programme.
+// Premium is operated in-branch (no in-app purchase). This screen
+// introduces the benefits and points customers to email for details.
 export function MembershipInfoScreen() {
-  const [notified, setNotified] = useState(false);
+  const { width: screenWidth } = useWindowDimensions();
+  const cardWidth = screenWidth - CARD_SIDE_MARGIN * 2;
+  const cardHeight = Math.round(cardWidth / CARD_ASPECT);
+
+  function emailUs() {
+    Linking.openURL(
+      `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('BidaWash Premium — question')}`,
+    ).catch(() => {});
+  }
 
   return (
-    <Screen>
-      <View style={styles.hero}>
-        <Text style={styles.tag}>Coming soon</Text>
-        <Text style={styles.title}>BidaWash Members</Text>
-        <Text style={styles.subtitle}>
-          Unlimited washes and member perks. Launching with our next release.
+    <Screen contentContainerStyle={styles.root}>
+      <View style={styles.headline}>
+        <View style={styles.tagPill}>
+          <Text style={styles.tagLabel}>BIDAWASH PREMIUM</Text>
+        </View>
+        <Text style={styles.preheader}>Rewarding our regulars with</Text>
+        <Text style={styles.heroline}>Loyalty benefits</Text>
+        <Text style={styles.heroline}>
+          <Text style={styles.andText}>and </Text>seasonal promos
         </Text>
       </View>
 
-      <Section title="Planned benefits">
-        <Card>
-          {BENEFITS.map((b) => (
-            <Text key={b} style={styles.benefit}>
-              • {b}
-            </Text>
-          ))}
-        </Card>
-      </Section>
+      <Image
+        source={require('../../../assets/bidawash-premium-card.png')}
+        style={[styles.card, { width: cardWidth, height: cardHeight }]}
+        resizeMode="cover"
+        accessibilityLabel="BidaWash Premium loyalty card preview"
+      />
 
-      {notified ? (
-        <Card>
-          <Text style={styles.confirmTitle}>You&apos;re on the list.</Text>
-          <Text style={styles.confirmBody}>
-            We&apos;ll send a push notification the moment memberships are live.
-          </Text>
-        </Card>
-      ) : (
-        <Button title="Notify me when available" onPress={() => setNotified(true)} />
-      )}
+      <View style={[styles.perks, { width: cardWidth }]}>
+        <Text style={styles.perkLine}>• Preferred wash slots during peak hours</Text>
+        <Text style={styles.perkLine}>• Loyalty rewards for frequent customers</Text>
+        <Text style={styles.perkLine}>• Branch-exclusive seasonal offers</Text>
+      </View>
+
+      <View style={[styles.ctaWrap, { width: cardWidth }]}>
+        <Button title="Ask about Premium" variant="dark" onPress={emailUs} />
+      </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: { gap: theme.spacing.xs },
-  tag: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-    color: theme.colors.primary,
-    textTransform: 'uppercase',
+  root: { gap: theme.spacing.lg, paddingBottom: theme.spacing.xl },
+  headline: { alignItems: 'center', gap: theme.spacing.sm },
+  tagPill: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: 4,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.primary,
   },
-  title: { fontSize: 28, fontWeight: '700', color: theme.colors.text },
-  subtitle: { fontSize: 15, color: theme.colors.muted, lineHeight: 22 },
-  benefit: { fontSize: 14, color: theme.colors.text, paddingVertical: 3 },
-  confirmTitle: { fontSize: 16, fontWeight: '700', color: theme.colors.success },
-  confirmBody: { fontSize: 14, color: theme.colors.muted, lineHeight: 20 },
+  tagLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1,
+    color: '#FFFFFF',
+  },
+  preheader: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: theme.colors.text,
+    textAlign: 'center',
+  },
+  heroline: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: theme.colors.text,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+    lineHeight: 38,
+  },
+  andText: {
+    fontSize: 17,
+    fontWeight: '600',
+    letterSpacing: 0,
+  },
+  card: {
+    alignSelf: 'center',
+    borderRadius: theme.radius.lg,
+  },
+  perks: {
+    alignSelf: 'center',
+    gap: theme.spacing.xs,
+  },
+  perkLine: {
+    fontSize: 15,
+    color: theme.colors.text,
+    lineHeight: 22,
+  },
+  ctaWrap: {
+    alignSelf: 'center',
+  },
 });

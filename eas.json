@@ -19,7 +19,7 @@
         "simulator": false
       },
       "android": {
-        "buildType": "apk"
+        "buildType": "app-bundle"
       }
     },
     "production": {
@@ -31,6 +31,17 @@
     }
   },
   "submit": {
+    "preview": {
+      "ios": {
+        "ascAppId": "REPLACE_WITH_APP_STORE_CONNECT_APP_ID",
+        "appleTeamId": "REPLACE_WITH_APPLE_TEAM_ID"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./secrets/google-play-service-account.json",
+        "track": "alpha",
+        "releaseStatus": "draft"
+      }
+    },
     "production": {
       "ios": {
         "ascAppId": "REPLACE_WITH_APP_STORE_CONNECT_APP_ID",
@@ -38,7 +49,7 @@
       },
       "android": {
         "serviceAccountKeyPath": "./secrets/google-play-service-account.json",
-        "track": "internal"
+        "track": "production"
       }
     }
   }

@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useAuth } from '@/auth/AuthContext';
 import { Card } from '@/components/Card';
+import { FavoriteToggle } from '@/components/FavoriteToggle';
 import { Screen } from '@/components/Screen';
 import { theme } from '@/theme';
 
@@ -20,21 +22,41 @@ function formatDuration(minutes: number): string {
 }
 
 export function ServicesScreen() {
+  const { user, updateFavorites } = useAuth();
+
+  async function toggleFavorite(serviceId: string) {
+    const isCurrent = user?.favoriteServiceId === serviceId;
+    try {
+      await updateFavorites({ favoriteServiceId: isCurrent ? null : serviceId });
+    } catch {
+      // AuthContext rolls back optimistic state on failure.
+    }
+  }
+
   return (
     <Screen>
       <Text style={styles.intro}>
-        From an express rinse to multi-hour detailing — here&apos;s what we offer.
+        Two ways to keep your car looking sharp — here&apos;s what we offer.
       </Text>
-      {mockServices.map((s) => (
-        <Card key={s.id}>
-          <View style={styles.headerRow}>
-            <Text style={styles.name}>{s.name}</Text>
-            <Text style={styles.price}>from {formatPrice(s.startingPricePhp)}</Text>
-          </View>
-          <Text style={styles.body}>{s.description}</Text>
-          <Text style={styles.duration}>≈ {formatDuration(s.durationMinutes)}</Text>
-        </Card>
-      ))}
+      {mockServices.map((s) => {
+        const isFavorite = user?.favoriteServiceId === s.id;
+        return (
+          <Card key={s.id}>
+            <View style={styles.headerRow}>
+              <Text style={styles.name}>{s.name}</Text>
+              <Text style={styles.price}>from {formatPrice(s.startingPricePhp)}</Text>
+            </View>
+            <Text style={styles.body}>{s.description}</Text>
+            <Text style={styles.duration}>≈ {formatDuration(s.durationMinutes)}</Text>
+            <FavoriteToggle
+              isFavorite={isFavorite}
+              onToggle={() => toggleFavorite(s.id)}
+              labelWhenFavorite="Your usual"
+              labelWhenNot="Set as your usual"
+            />
+          </Card>
+        );
+      })}
     </Screen>
   );
 }

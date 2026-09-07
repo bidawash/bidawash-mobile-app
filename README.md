@@ -37,7 +37,7 @@ uploads them to TestFlight / Google Play, and ships over-the-air JS updates
 between store releases. See [docs/PROJECT-PLAN.md §2](docs/PROJECT-PLAN.md#2-stack-react-native--expo-eas)
 for the full rationale.
 
-Bundle ID / Application ID: `ph.bidawash.app`
+Bundle ID / Application ID: `com.bidawash.app`
 
 ## Quick start
 
@@ -54,6 +54,42 @@ npm run start
 
 Then press `i` for iOS Simulator, `a` for Android emulator, or scan the QR
 code with Expo Go on a physical device.
+
+## Supabase setup
+
+The app talks to a Supabase project for auth and (in Phase 2) feature data.
+To run end-to-end locally:
+
+1. **Create a project** at [supabase.com](https://supabase.com), region
+   *Southeast Asia (Singapore)*. Copy the Project URL and the **anon** key
+   from Settings → API into your `.env`:
+   ```env
+   SUPABASE_URL=https://<ref>.supabase.co
+   SUPABASE_ANON_KEY=<anon-key>
+   ```
+2. **Apply the schema.** Open the SQL editor in the Supabase dashboard and
+   paste each migration in `supabase/migrations/` in order:
+   - [0001_auth_profiles.sql](supabase/migrations/0001_auth_profiles.sql) — `profiles` table, RLS, sign-up trigger.
+   - [0002_email_verification.sql](supabase/migrations/0002_email_verification.sql) — adds `email_verified_at` for soft email verification.
+   - [0003_favorites_and_faqs.sql](supabase/migrations/0003_favorites_and_faqs.sql) — favorite-branch and favorite-service columns on `profiles`, plus the `faqs` table with RLS.
+
+   Then paste [supabase/seed/faqs.sql](supabase/seed/faqs.sql) in the SQL editor to populate the FAQ list. The file upserts, so re-run it whenever [docs/faqs.csv](docs/faqs.csv) (the source of truth) changes.
+3. **Deploy the `delete-account` Edge Function.** Required for the in-app
+   "Delete account" button (App Store + Play Store policy).
+   ```bash
+   brew install supabase/tap/supabase   # or: npm i -g supabase
+   supabase login
+   supabase link --project-ref <ref>
+   supabase functions deploy delete-account
+   ```
+   The function reads `SUPABASE_SERVICE_ROLE_KEY` from the function-runtime
+   secrets that Supabase populates for you — no manual secret setup needed.
+4. **Configure auth URLs.** Authentication → URL Configuration:
+   - Site URL: `bidawash://`
+   - Redirect URLs: add both `bidawash://reset-password` and
+     `bidawash://verify-email`
+   These let the password-reset and email-verification links bounce back
+   into the app.
 
 ## Scripts
 

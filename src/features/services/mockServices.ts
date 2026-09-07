@@ -11,38 +11,19 @@ export type Service = {
 
 export const mockServices: Service[] = [
   {
-    id: 'express',
-    name: 'Express Wash',
-    description: 'Quick exterior wash with hand-dry. Back on the road in 15 minutes.',
-    durationMinutes: 15,
-    startingPricePhp: 150,
+    id: 'deluxe-foam',
+    name: 'Deluxe Foam Wash',
+    description:
+      '5-step touchless clean:\n1. Under-chassis wash\n2. Neutral pH pre-soak\n3. Shampoo wash\n4. High-pressure rinse\n5. Drying\n\nGentle on paint, tough on grime.',
+    durationMinutes: 10,
+    startingPricePhp: 320,
   },
   {
-    id: 'premium',
-    name: 'Premium Wash',
-    description: 'Full exterior plus interior vacuum, dashboard wipe, and tire shine.',
-    durationMinutes: 35,
-    startingPricePhp: 350,
-  },
-  {
-    id: 'detailing',
-    name: 'Detailing',
-    description: 'Deep clean: clay-bar treatment, paint correction, and interior shampoo.',
-    durationMinutes: 180,
-    startingPricePhp: 2500,
-  },
-  {
-    id: 'wax',
-    name: 'Wax & Polish',
-    description: 'Hand-applied carnauba wax for shine and weather protection.',
-    durationMinutes: 60,
-    startingPricePhp: 800,
-  },
-  {
-    id: 'interior',
-    name: 'Interior Deep Clean',
-    description: 'Shampoo seats and carpets, condition leather, dress interior plastics.',
-    durationMinutes: 90,
-    startingPricePhp: 1200,
+    id: 'premium-wax',
+    name: 'Premium Wax Wash',
+    description:
+      'Everything in the Deluxe Foam Wash, plus a water-wax application before drying for extra shine and environmental protection.',
+    durationMinutes: 10,
+    startingPricePhp: 380,
   },
 ];

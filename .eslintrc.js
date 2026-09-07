@@ -8,7 +8,7 @@ module.exports = {
     sourceType: 'module',
     ecmaFeatures: { jsx: true },
   },
-  ignorePatterns: ['node_modules', '.expo', 'dist', 'web-build', 'ios', 'android'],
+  ignorePatterns: ['node_modules', '.expo', 'dist', 'web-build', 'ios', 'android', 'supabase'],
   rules: {
     'prettier/prettier': 'warn',
     '@typescript-eslint/no-unused-vars': [

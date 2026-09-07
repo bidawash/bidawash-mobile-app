@@ -173,7 +173,7 @@ Day-one conventions (all enforced by tooling in Phase 1):
   (Guideline 4.8). Email/password-only avoids this.
 - Account deletion in-app (Guideline 5.1.1(v)) — non-negotiable since 2022.
 - Bundle ID chosen carefully; cannot be changed after first submission.
-  Chosen: **`ph.bidawash.app`**.
+  Chosen: **`com.bidawash.app`**.
 
 ### Android
 
@@ -376,7 +376,7 @@ and copy are ready; 8–10 weeks if designing as we go.
 5. ⬜ Stand up privacy policy + terms pages on a stable URL.
 6. 🔧 Create Expo app with EAS configured for `development` / `preview` /
    `production` profiles. **(In progress)**
-7. 🔧 Lock: bundle ID (`ph.bidawash.app`), app name (`BidaWash`), primary
+7. 🔧 Lock: bundle ID (`com.bidawash.app`), app name (`BidaWash`), primary
    brand colors (placeholders), app icon (1024×1024) and splash (TBD —
    designer).
 8. 🔧 Set up Sentry, ESLint, Prettier, TypeScript strict, commitlint,

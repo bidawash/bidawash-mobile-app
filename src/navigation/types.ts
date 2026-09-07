@@ -34,6 +34,7 @@ export type MembershipStackParamList = {
 
 export type AccountStackParamList = {
   AccountHome: undefined;
+  EditProfile: undefined;
   Faqs: undefined;
   Support: undefined;
   Privacy: undefined;
