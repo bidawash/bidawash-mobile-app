@@ -72,8 +72,12 @@ To run end-to-end locally:
    - [0001_auth_profiles.sql](supabase/migrations/0001_auth_profiles.sql) — `profiles` table, RLS, sign-up trigger.
    - [0002_email_verification.sql](supabase/migrations/0002_email_verification.sql) — adds `email_verified_at` for soft email verification.
    - [0003_favorites_and_faqs.sql](supabase/migrations/0003_favorites_and_faqs.sql) — favorite-branch and favorite-service columns on `profiles`, plus the `faqs` table with RLS.
+   - [0004_content_tables.sql](supabase/migrations/0004_content_tables.sql) — `locations`, `services`, `location_services`, and `announcements` tables with RLS.
+   - [0005_locations_coming_soon.sql](supabase/migrations/0005_locations_coming_soon.sql) — adds `is_coming_soon` on `locations` so a not-yet-open branch can appear with a COMING SOON badge.
+   - [0006_membership_interest.sql](supabase/migrations/0006_membership_interest.sql) — adds `membership_interest_at` on `profiles` for the BidaWash Premium launch waitlist.
+   - [0007_public_content_reads.sql](supabase/migrations/0007_public_content_reads.sql) — opens `locations`, `services`, `location_services`, `announcements`, and `faqs` to unauthenticated reads so guest-mode users can browse without signing up.
 
-   Then paste [supabase/seed/faqs.sql](supabase/seed/faqs.sql) in the SQL editor to populate the FAQ list. The file upserts, so re-run it whenever [docs/faqs.csv](docs/faqs.csv) (the source of truth) changes.
+   Then paste both seed files: [supabase/seed/faqs.sql](supabase/seed/faqs.sql) (customer FAQs from [docs/faqs.csv](docs/faqs.csv)) and [supabase/seed/content.sql](supabase/seed/content.sql) (branches, services, announcements). Both use `on conflict do update`, so re-run whenever the source content changes.
 3. **Deploy the `delete-account` Edge Function.** Required for the in-app
    "Delete account" button (App Store + Play Store policy).
    ```bash

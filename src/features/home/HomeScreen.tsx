@@ -1,28 +1,27 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { fetchAnnouncements } from '@/api/announcements';
+import { fetchLocations } from '@/api/locations';
+import { fetchServices } from '@/api/services';
 import { useAuth } from '@/auth/AuthContext';
 import { Screen } from '@/components/Screen';
 import { VerifyEmailBanner } from '@/components/VerifyEmailBanner';
-import { mockLocations } from '@/features/locations/mockLocations';
+import { mockAnnouncements, type Announcement } from '@/features/home/mockAnnouncements';
+import { mockLocations, type Location } from '@/features/locations/mockLocations';
+import { mockServices, type Service } from '@/features/services/mockServices';
 import type { HomeScreenProps } from '@/navigation/types';
 import { theme } from '@/theme';
 
-import { mockAnnouncements } from './mockAnnouncements';
-
-type ServiceTile = {
-  key: string;
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
+// Static per-service icon map. Adding a new service to the DB without
+// an entry here just falls back to DEFAULT_ICON — no client change
+// required, but a follow-up commit picking the right icon is nicer.
+const SERVICE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  'deluxe-foam': 'water-outline',
+  'premium-wax': 'sparkles-outline',
 };
-
-// Stand-in service tiles. Real catalogue lives behind the Services tab;
-// these are quick-access shortcuts on the home screen. When the Services
-// table is wired to Supabase, source these from there too.
-const SERVICES: ServiceTile[] = [
-  { key: 'deluxe-foam', label: 'Deluxe Foam Wash', icon: 'water-outline' },
-  { key: 'premium-wax', label: 'Premium Wax Wash', icon: 'sparkles-outline' },
-];
+const DEFAULT_ICON: keyof typeof Ionicons.glyphMap = 'car-outline';
 
 function timeGreeting(): string {
   const hour = new Date().getHours();
@@ -33,10 +32,42 @@ function timeGreeting(): string {
 
 export function HomeScreen({ navigation }: HomeScreenProps<'HomeScreen'>) {
   const { user } = useAuth();
+  const [locations, setLocations] = useState<Location[]>(mockLocations);
+  const [services, setServices] = useState<Service[]>(mockServices);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(mockAnnouncements);
   const firstName = user?.name.split(' ')[0];
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchLocations().then((r) => {
+      if (!cancelled && r.length > 0) setLocations(r);
+    });
+    fetchServices().then((r) => {
+      if (!cancelled && r.length > 0) setServices(r);
+    });
+    fetchAnnouncements().then((r) => {
+      if (!cancelled && r.length > 0) setAnnouncements(r);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const favoriteLocation = user?.favoriteLocationId
-    ? mockLocations.find((l) => l.id === user.favoriteLocationId)
+    ? locations.find((l) => l.id === user.favoriteLocationId)
     : undefined;
+
+  // Tiles come from featured services when any exist; otherwise show
+  // every active service so the home grid is never empty.
+  const featuredTiles = useMemo(() => {
+    const featured = services.filter((s) => s.isFeatured);
+    const source = featured.length > 0 ? featured : services;
+    return source.map((s) => ({
+      key: s.id,
+      label: s.name,
+      icon: SERVICE_ICONS[s.id] ?? DEFAULT_ICON,
+    }));
+  }, [services]);
 
   function openFavoriteBranch() {
     if (!favoriteLocation) return;
@@ -80,23 +111,23 @@ export function HomeScreen({ navigation }: HomeScreenProps<'HomeScreen'>) {
       <View>
         <Text style={styles.sectionTitle}>Services</Text>
         <View style={styles.servicesGrid}>
-          {SERVICES.map((service) => {
-            const isFavorite = user?.favoriteServiceId === service.key;
+          {featuredTiles.map((tile) => {
+            const isFavorite = user?.favoriteServiceId === tile.key;
             return (
               <Pressable
-                key={service.key}
+                key={tile.key}
                 onPress={() => navigation.navigate('Services')}
                 accessibilityRole="button"
-                accessibilityLabel={isFavorite ? `${service.label} — your usual` : service.label}
+                accessibilityLabel={isFavorite ? `${tile.label} — your usual` : tile.label}
                 style={({ pressed }) => [
                   styles.serviceTile,
                   pressed ? styles.servicePressed : null,
                 ]}
               >
                 <View style={styles.serviceIconWrap}>
-                  <Ionicons name={service.icon} size={26} color={theme.colors.primary} />
+                  <Ionicons name={tile.icon} size={26} color={theme.colors.primary} />
                 </View>
-                <Text style={styles.serviceLabel}>{service.label}</Text>
+                <Text style={styles.serviceLabel}>{tile.label}</Text>
                 {isFavorite ? <Text style={styles.usualPill}>★ Your usual</Text> : null}
               </Pressable>
             );
@@ -106,7 +137,7 @@ export function HomeScreen({ navigation }: HomeScreenProps<'HomeScreen'>) {
 
       <View>
         <Text style={styles.sectionTitle}>Latest Updates</Text>
-        {mockAnnouncements.map((a, i) => {
+        {announcements.map((a, i) => {
           // Rotate background per card: hero → dark slate, then
           // brand blue / brand red. All three use white text.
           const isHero = i === 0;

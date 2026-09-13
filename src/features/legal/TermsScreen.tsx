@@ -6,7 +6,7 @@ import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { theme } from '@/theme';
 
-const TERMS_URL = 'https://bidawash.com/terms';
+const TERMS_URL = 'https://www.bidawash.com/terms';
 
 export function TermsScreen() {
   function openFull() {

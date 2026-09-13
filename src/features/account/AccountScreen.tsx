@@ -10,7 +10,7 @@ import type { AccountScreenProps } from '@/navigation/types';
 import { theme } from '@/theme';
 
 export function AccountScreen({ navigation }: AccountScreenProps<'AccountHome'>) {
-  const { user, signOut, deleteAccount } = useAuth();
+  const { user, signOut, deleteAccount, exitGuestMode } = useAuth();
 
   function confirmSignOut() {
     Alert.alert('Sign out?', 'You can sign back in any time.', [
@@ -60,15 +60,29 @@ export function AccountScreen({ navigation }: AccountScreenProps<'AccountHome'>)
 
   return (
     <Screen>
-      <Card onPress={() => navigation.navigate('EditProfile')}>
-        <Text style={styles.name}>{user?.name ?? 'Guest'}</Text>
-        <Text style={styles.email}>{user?.email ?? ''}</Text>
-        {user?.phone ? <Text style={styles.email}>{user.phone}</Text> : null}
-        {user?.emailVerified ? <Text style={styles.verifiedPill}>✓ Email verified</Text> : null}
-        <Text style={styles.editHint}>Tap to edit</Text>
-      </Card>
+      {user ? (
+        <>
+          <Card onPress={() => navigation.navigate('EditProfile')}>
+            <Text style={styles.name}>{user.name}</Text>
+            <Text style={styles.email}>{user.email}</Text>
+            {user.phone ? <Text style={styles.email}>{user.phone}</Text> : null}
+            {user.emailVerified ? <Text style={styles.verifiedPill}>✓ Email verified</Text> : null}
+            <Text style={styles.editHint}>Tap to edit</Text>
+          </Card>
 
-      <VerifyEmailBanner />
+          <VerifyEmailBanner />
+        </>
+      ) : (
+        <Card>
+          <Text style={styles.guestTitle}>You&apos;re browsing as a guest</Text>
+          <Text style={styles.guestBody}>
+            Create a BidaWash account to save favorite branches and services, join the BidaWash
+            Premium launch waitlist, and manage your profile.
+          </Text>
+          <Button title="Sign up" onPress={exitGuestMode} />
+          <Button title="Sign in" variant="secondary" onPress={exitGuestMode} />
+        </Card>
+      )}
 
       <Section title="Information">
         <Card onPress={() => navigation.navigate('Faqs')}>
@@ -90,13 +104,15 @@ export function AccountScreen({ navigation }: AccountScreenProps<'AccountHome'>)
         </Card>
       </Section>
 
-      <Section title="Account">
-        <Button title="Sign out" variant="secondary" onPress={confirmSignOut} />
-        <Button title="Delete account" variant="ghost" onPress={confirmDeleteAccount} />
-      </Section>
+      {user ? (
+        <Section title="Account">
+          <Button title="Sign out" variant="secondary" onPress={confirmSignOut} />
+          <Button title="Delete account" variant="ghost" onPress={confirmDeleteAccount} />
+        </Section>
+      ) : null}
 
       <View style={styles.footer}>
-        <Text style={styles.versionLabel}>BidaWash v0.1.0</Text>
+        <Text style={styles.versionLabel}>BidaWash v1.0.0</Text>
       </View>
     </Screen>
   );
@@ -111,6 +127,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: theme.colors.primary,
     marginTop: theme.spacing.xs,
+  },
+  guestTitle: { fontSize: 18, fontWeight: '800', color: theme.colors.text },
+  guestBody: {
+    fontSize: 14,
+    color: theme.colors.muted,
+    lineHeight: 20,
+    marginBottom: theme.spacing.xs,
   },
   linkTitle: { fontSize: 16, fontWeight: '600', color: theme.colors.text },
   linkBody: { fontSize: 13, color: theme.colors.muted, lineHeight: 18 },

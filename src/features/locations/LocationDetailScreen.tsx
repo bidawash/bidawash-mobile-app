@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 
+import { fetchLocations } from '@/api/locations';
 import { useAuth } from '@/auth/AuthContext';
+import { useRequireAuth } from '@/auth/useRequireAuth';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { FavoriteToggle } from '@/components/FavoriteToggle';
@@ -9,11 +12,46 @@ import { Section } from '@/components/Section';
 import type { LocationsScreenProps } from '@/navigation/types';
 import { theme } from '@/theme';
 
-import { findLocation } from './mockLocations';
+import { mockLocations, type Location, type LocationHours } from './mockLocations';
+
+// Convert "HH:mm" (24h) to "H:mm AM/PM" for display.
+function to12h(hhmm: string): string {
+  const [hStr, mStr] = hhmm.split(':');
+  const h = Number(hStr);
+  const m = Number(mStr);
+  if (Number.isNaN(h) || Number.isNaN(m)) return hhmm;
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return m === 0 ? `${hour12}:00 ${period}` : `${hour12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+// If every day of the week has the same open/close, collapse to a
+// single "Every day · X – Y" line; otherwise return per-day lines.
+function formatHoursLines(hours: LocationHours[]): string[] {
+  const first = hours[0];
+  if (!first) return ['Every day · 8:00 AM – 7:00 PM'];
+  const allSame = hours.every((h) => h.open === first.open && h.close === first.close);
+  if (allSame) return [`Every day · ${to12h(first.open)} – ${to12h(first.close)}`];
+  return hours.map((h) => `${h.day} · ${to12h(h.open)} – ${to12h(h.close)}`);
+}
 
 export function LocationDetailScreen({ route }: LocationsScreenProps<'LocationDetail'>) {
-  const location = findLocation(route.params.locationId);
+  const [locations, setLocations] = useState<Location[]>(mockLocations);
   const { user, updateFavorites } = useAuth();
+  const requireAuth = useRequireAuth();
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchLocations().then((remote) => {
+      if (cancelled) return;
+      if (remote.length > 0) setLocations(remote);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const location = locations.find((l) => l.id === route.params.locationId);
 
   if (!location) {
     return (
@@ -27,6 +65,7 @@ export function LocationDetailScreen({ route }: LocationsScreenProps<'LocationDe
 
   async function toggleFavorite() {
     if (!location) return;
+    if (!requireAuth('save favorite branches')) return;
     try {
       await updateFavorites({ favoriteLocationId: isFavorite ? null : location.id });
     } catch {
@@ -52,6 +91,16 @@ export function LocationDetailScreen({ route }: LocationsScreenProps<'LocationDe
         </Text>
       </View>
 
+      {location.isComingSoon ? (
+        <View style={styles.comingSoonBanner}>
+          <Text style={styles.comingSoonLabel}>COMING SOON</Text>
+          <Text style={styles.comingSoonBody}>
+            This branch isn&apos;t open yet. The hours and services below are what to expect when we
+            open — check back soon.
+          </Text>
+        </View>
+      ) : null}
+
       <FavoriteToggle
         isFavorite={isFavorite}
         onToggle={toggleFavorite}
@@ -63,7 +112,11 @@ export function LocationDetailScreen({ route }: LocationsScreenProps<'LocationDe
 
       <Section title="Opening hours">
         <Card>
-          <Text style={styles.hoursLine}>Every day · 8:00 AM – 7:00 PM</Text>
+          {formatHoursLines(location.hours).map((line) => (
+            <Text key={line} style={styles.hoursLine}>
+              {line}
+            </Text>
+          ))}
         </Card>
       </Section>
 
@@ -91,6 +144,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 4,
     lineHeight: 20,
+  },
+  comingSoonBanner: {
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.brand,
+    borderRadius: theme.radius.lg,
+    gap: 4,
+  },
+  comingSoonLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.8,
+  },
+  comingSoonBody: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    opacity: 0.95,
+    lineHeight: 18,
   },
   hoursLine: { fontSize: 14, color: theme.colors.text, fontWeight: '600' },
   feature: { fontSize: 14, color: theme.colors.text, paddingVertical: 2 },

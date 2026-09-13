@@ -6,7 +6,7 @@ import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { theme } from '@/theme';
 
-const PRIVACY_URL = 'https://bidawash.com/privacy';
+const PRIVACY_URL = 'https://www.bidawash.com/privacy';
 
 export function PrivacyScreen() {
   function openFull() {

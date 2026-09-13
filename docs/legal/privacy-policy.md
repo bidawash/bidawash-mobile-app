@@ -27,8 +27,17 @@ Privacy Act of 2012 (Republic Act No. 10173).
 - **Service logs:** timestamps and endpoints, kept short-term for
   security and troubleshooting.
 
-We do **not** collect: precise location, contacts, photos, camera,
-microphone, health, or financial information.
+### Location — only when you use it
+
+If you tap **"Sort by nearest"** on the Locations tab, we ask iOS or
+Android for your device location so we can sort branches by distance.
+Your coordinates are used only on your device — they are **never sent
+to our servers, never stored, and never shared**. You can decline the
+permission prompt and continue using the app; you simply won't be able
+to sort by nearest.
+
+We do **not** collect: contacts, photos, camera, microphone, health,
+or financial information.
 
 ## 2. How we use your information
 

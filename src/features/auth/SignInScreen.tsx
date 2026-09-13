@@ -11,7 +11,7 @@ import type { AuthScreenProps } from '@/navigation/types';
 import { theme } from '@/theme';
 
 export function SignInScreen({ navigation }: AuthScreenProps<'SignIn'>) {
-  const { signIn, isLoading } = useAuth();
+  const { signIn, isLoading, enterGuestMode } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +64,11 @@ export function SignInScreen({ navigation }: AuthScreenProps<'SignIn'>) {
         />
       </View>
 
+      <View style={styles.guestBlock}>
+        <Text style={styles.guestHint}>Just looking around?</Text>
+        <Button title="Continue as guest" variant="secondary" onPress={enterGuestMode} />
+      </View>
+
       <View style={styles.footer}>
         <Text style={styles.footerText}>Don&apos;t have an account?</Text>
         <Button title="Sign up" variant="ghost" onPress={() => navigation.navigate('SignUp')} />
@@ -78,6 +83,16 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 15, fontWeight: '700', color: theme.colors.text, lineHeight: 21 },
   form: { gap: theme.spacing.md },
   error: { color: theme.colors.danger, fontSize: 13 },
+  guestBlock: {
+    gap: theme.spacing.sm,
+    alignItems: 'center',
+    marginTop: theme.spacing.sm,
+  },
+  guestHint: {
+    fontSize: 13,
+    color: theme.colors.muted,
+    fontStyle: 'italic',
+  },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
   footerText: { color: theme.colors.text, fontSize: 14 },
 });

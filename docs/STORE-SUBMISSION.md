@@ -13,7 +13,7 @@ Operational reference for each store submission. Pair with
       numbers auto-bumped by EAS Submit.
 - [ ] Privacy policy URL live and reachable.
 - [ ] Terms of service URL live and reachable.
-- [ ] Support URL: `https://bidawash.com/support` (or similar).
+- [ ] Support URL: `https://www.bidawash.com/support` (or similar).
 - [ ] Support email: `support@bidawash.com`.
 - [ ] Reviewer account: `reviewer@bidawash.com` with pre-seeded data; note
       credentials in each store's review notes.
@@ -62,8 +62,9 @@ Operational reference for each store submission. Pair with
       functionality.
 - [ ] Push token (Expo / APNs) — Not linked.
 - [ ] Crash / performance data (Sentry) — Not linked, used for analytics.
-- [ ] Location (if "find nearest branch" enabled) — Not linked, used for
-      app functionality.
+- [ ] Location (find nearest branch — **implemented**) — Not linked to
+      the user, not stored, used on-device only. Declared as "Precise
+      Location" collected for "App Functionality".
 - [ ] Payment info (Phase 3 only) — Not collected by the app; processed by
       Stripe/Maya/GCash directly.
 
@@ -74,8 +75,10 @@ When the relevant capability is added, set a user-facing reason:
 - `NSCameraUsageDescription` — "BidaWash uses the camera to scan your
   membership QR code at the wash bay."
 - `NSPhotoLibraryUsageDescription` — only if photo upload is added.
-- `NSLocationWhenInUseUsageDescription` — "BidaWash uses your location to
-  show the nearest branch and operating hours."
+- `NSLocationWhenInUseUsageDescription` — set via the `expo-location`
+  plugin's `locationWhenInUsePermission` in `app.config.ts`: "BidaWash
+  uses your location to show the nearest branch. Location is used only
+  when you tap 'Sort by nearest' and never leaves your device."
 - `NSUserTrackingUsageDescription` — only if cross-app tracking is added
   (likely never).
 
@@ -127,7 +130,9 @@ Mirror the Apple App Privacy answers. Categories to declare:
       can be deleted).
 - [ ] App activity: crash logs (Sentry).
 - [ ] Device or other IDs: push tokens.
-- [ ] Location (if used).
+- [ ] Location (find nearest branch — **implemented**) — approximate or
+      precise location, collected on demand only, not shared, not stored.
+      Purpose: App functionality.
 - [ ] Financial info (Phase 3 only) — declare provider-processed, not
       collected by the app.
 
@@ -137,9 +142,10 @@ Mirror the Apple App Privacy answers. Categories to declare:
       each August).
 - [ ] `adaptive-icon` configured (foreground + background).
 - [ ] Permissions in `AndroidManifest.xml` minimized; each justified in
-      review notes.
+      review notes. `ACCESS_COARSE_LOCATION` and `ACCESS_FINE_LOCATION`
+      added by the `expo-location` plugin for the nearest-branch flow.
 - [ ] Account deletion: in-app **and** publicly documented at
-      `https://bidawash.com/account-deletion` (or similar).
+      `https://www.bidawash.com/account-deletion` (or similar).
 
 ### Payments (Phase 3)
 

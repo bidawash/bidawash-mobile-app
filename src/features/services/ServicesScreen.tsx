@@ -1,12 +1,15 @@
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { fetchServices } from '@/api/services';
 import { useAuth } from '@/auth/AuthContext';
+import { useRequireAuth } from '@/auth/useRequireAuth';
 import { Card } from '@/components/Card';
 import { FavoriteToggle } from '@/components/FavoriteToggle';
 import { Screen } from '@/components/Screen';
 import { theme } from '@/theme';
 
-import { mockServices } from './mockServices';
+import { mockServices, type Service } from './mockServices';
 
 function formatPrice(php: number): string {
   return `₱${php.toLocaleString('en-PH')}`;
@@ -23,8 +26,22 @@ function formatDuration(minutes: number): string {
 
 export function ServicesScreen() {
   const { user, updateFavorites } = useAuth();
+  const requireAuth = useRequireAuth();
+  const [services, setServices] = useState<Service[]>(mockServices);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchServices().then((remote) => {
+      if (cancelled) return;
+      if (remote.length > 0) setServices(remote);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function toggleFavorite(serviceId: string) {
+    if (!requireAuth('save a favorite service')) return;
     const isCurrent = user?.favoriteServiceId === serviceId;
     try {
       await updateFavorites({ favoriteServiceId: isCurrent ? null : serviceId });
@@ -35,10 +52,8 @@ export function ServicesScreen() {
 
   return (
     <Screen>
-      <Text style={styles.intro}>
-        Two ways to keep your car looking sharp — here&apos;s what we offer.
-      </Text>
-      {mockServices.map((s) => {
+      <Text style={styles.intro}>Here&apos;s what BidaWash offers.</Text>
+      {services.map((s) => {
         const isFavorite = user?.favoriteServiceId === s.id;
         return (
           <Card key={s.id}>

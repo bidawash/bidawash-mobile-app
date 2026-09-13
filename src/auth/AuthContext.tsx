@@ -1,6 +1,7 @@
 import * as Linking from 'expo-linking';
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -23,6 +24,10 @@ export type AuthUser = {
   // Both default to null; see supabase/migrations/0003_favorites_and_faqs.sql.
   favoriteLocationId: string | null;
   favoriteServiceId: string | null;
+  // ISO timestamp of when the user opted in to the BidaWash Premium
+  // launch waitlist. Null if not opted in. See
+  // supabase/migrations/0006_membership_interest.sql.
+  membershipInterestedAt: string | null;
 };
 
 type AuthContextValue = {
@@ -36,6 +41,13 @@ type AuthContextValue = {
   // True once the user has tapped a password-reset link and we're holding
   // them on the "set new password" screen until they submit.
   passwordRecovery: boolean;
+  // True when the user picked "Continue as guest" from the auth flow.
+  // Grants access to AppTabs without a Supabase session. Reset to false
+  // on exit (or on any successful sign-in/sign-up). Per-session only —
+  // relaunching the app returns the user to the auth flow.
+  guestMode: boolean;
+  enterGuestMode: () => void;
+  exitGuestMode: () => void;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (
     email: string,
@@ -58,6 +70,9 @@ type AuthContextValue = {
     favoriteLocationId?: string | null;
     favoriteServiceId?: string | null;
   }) => Promise<void>;
+  // Toggles the user's BidaWash Premium launch-waitlist opt-in. Sets
+  // a timestamp when interested=true; clears to null otherwise.
+  setMembershipInterest: (interested: boolean) => Promise<void>;
   deleteAccount: () => Promise<void>;
 };
 
@@ -73,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [passwordRecovery, setPasswordRecovery] = useState(false);
+  const [guestMode, setGuestMode] = useState(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -97,6 +113,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const next = await resolveUser(session?.user ?? null);
       if (!mountedRef.current) return;
       setUser(next);
+      // Any successful auth event clears guest mode automatically.
+      if (next) setGuestMode(false);
       if (event === 'PASSWORD_RECOVERY') {
         setPasswordRecovery(true);
       }
@@ -137,12 +155,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  const enterGuestMode = useCallback(() => setGuestMode(true), []);
+  const exitGuestMode = useCallback(() => setGuestMode(false), []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       isLoading,
       isInitializing,
       passwordRecovery,
+      guestMode,
+      enterGuestMode,
+      exitGuestMode,
       async signIn(email, password) {
         setIsLoading(true);
         try {
@@ -252,6 +276,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           throw error;
         }
       },
+      async setMembershipInterest(interested) {
+        if (!user) throw new Error('Not signed in.');
+        const value = interested ? new Date().toISOString() : null;
+        // Optimistic local update — the toggle should feel instant.
+        setUser((prev) => (prev ? { ...prev, membershipInterestedAt: value } : prev));
+        const { error } = await supabase
+          .from('profiles')
+          .update({ membership_interest_at: value })
+          .eq('id', user.id);
+        if (error) {
+          const { data } = await supabase.auth.getUser();
+          const next = await resolveUser(data.user ?? null);
+          if (mountedRef.current) setUser(next);
+          throw error;
+        }
+      },
       async deleteAccount() {
         const { data, error } = await supabase.functions.invoke('delete-account', {
           method: 'POST',
@@ -263,7 +303,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
       },
     }),
-    [user, isLoading, isInitializing, passwordRecovery],
+    [user, isLoading, isInitializing, passwordRecovery, guestMode, enterGuestMode, exitGuestMode],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -284,9 +324,9 @@ function parseUrlFragment(url: string): URLSearchParams {
 }
 
 // Map a Supabase auth user to our AuthUser shape. Reads name/phone/favorites
-// from the profiles table; falls back to the user_metadata name (set at
-// sign-up) and finally to the email's local-part so the UI always has
-// something to show.
+// / membership-interest from the profiles table; falls back to the
+// user_metadata name (set at sign-up) and finally to the email's local-part
+// so the UI always has something to show.
 async function resolveUser(
   authUser: { id: string; email?: string | null; user_metadata?: Record<string, unknown> } | null,
 ): Promise<AuthUser | null> {
@@ -301,7 +341,9 @@ async function resolveUser(
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('name, phone, email_verified_at, favorite_location_id, favorite_service_id')
+    .select(
+      'name, phone, email_verified_at, favorite_location_id, favorite_service_id, membership_interest_at',
+    )
     .eq('id', authUser.id)
     .maybeSingle();
 
@@ -313,5 +355,8 @@ async function resolveUser(
     emailVerified: Boolean(profile?.email_verified_at),
     favoriteLocationId: profile?.favorite_location_id ?? null,
     favoriteServiceId: profile?.favorite_service_id ?? null,
+    membershipInterestedAt: profile?.membership_interest_at
+      ? String(profile.membership_interest_at)
+      : null,
   };
 }

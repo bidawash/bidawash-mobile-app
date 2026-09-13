@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useAuth } from '@/auth/AuthContext';
 import { BrandMark } from '@/components/BrandMark';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
@@ -15,16 +16,17 @@ const SLIDES = [
   },
   {
     title: 'Find a branch near you',
-    body: "Now in Ortigas and Pasay — and we're just getting started. Hours, services, and directions in seconds.",
+    body: 'Now in Mandaluyong — and Parañaque opens soon. Hours, services, and directions in seconds.',
   },
   {
-    title: 'Memberships coming soon',
-    body: "Earn massive savings with our membership program. Create an account now and we'll let you know the moment it launches.",
+    title: 'BidaWash Premium',
+    body: 'Loyalty rewards and branch-exclusive seasonal offers for our regulars — launching soon. Create an account to join the waitlist and be first to know.',
   },
 ];
 
 export function OnboardingScreen({ navigation }: AuthScreenProps<'Onboarding'>) {
   const [index, setIndex] = useState(0);
+  const { enterGuestMode } = useAuth();
   const slide = SLIDES[index];
   const isLast = index === SLIDES.length - 1;
 
@@ -95,6 +97,11 @@ export function OnboardingScreen({ navigation }: AuthScreenProps<'Onboarding'>) 
             </View>
           </View>
         )}
+
+        {/* Guest option is shown on every slide so users don't have to
+            traverse the whole onboarding OR tap "Sign in" first to find
+            it. Required for Apple Guideline 5.1.1(v). */}
+        <GuestShortcut onPress={enterGuestMode} />
       </View>
     </Screen>
   );
@@ -113,6 +120,23 @@ function SignInShortcut({ onPress }: { onPress: () => void }) {
     >
       <Text style={styles.signInLinkLabel}>Sign in</Text>
       <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
+    </Pressable>
+  );
+}
+
+// Bottom-centre "Continue as guest ›" link. Muted colour + chevron so it
+// reads as a secondary option to the primary CTA above it, but still
+// discoverable at a glance.
+function GuestShortcut({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.guestLink, pressed ? styles.guestLinkPressed : null]}
+      accessibilityRole="button"
+      accessibilityLabel="Continue as guest"
+    >
+      <Text style={styles.guestLinkLabel}>Continue as guest</Text>
+      <Ionicons name="chevron-forward" size={14} color={theme.colors.muted} />
     </Pressable>
   );
 }
@@ -296,4 +320,16 @@ const styles = StyleSheet.create({
   },
   nextLinkPressed: { opacity: 0.6 },
   nextLinkLabel: { fontSize: 16, fontWeight: '700', color: theme.colors.primary },
+
+  // Bottom "Continue as guest ›" link — muted so it reads as a
+  // secondary option to whatever primary action sits above it.
+  guestLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    paddingVertical: theme.spacing.xs,
+  },
+  guestLinkPressed: { opacity: 0.6 },
+  guestLinkLabel: { fontSize: 14, fontWeight: '600', color: theme.colors.muted },
 });
