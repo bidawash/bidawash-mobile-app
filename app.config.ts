@@ -160,6 +160,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         android: {
           kotlinVersion: '1.9.25',
+          // Play now requires targetSdkVersion >= 36 (Android 16).
+          // Overriding both compileSdk and targetSdk to 36 — if the
+          // Expo SDK 52 AGP can't cope, the fallback is a full SDK
+          // upgrade.
+          compileSdkVersion: 36,
+          targetSdkVersion: 36,
         },
       },
     ],
